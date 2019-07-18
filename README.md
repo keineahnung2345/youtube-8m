@@ -287,9 +287,9 @@ submit training $JOB_NAME \
 --segment_labels --run_once=True
 ```
 
-And here's how to perform inference with a model on the test set:
-
+And here's how to perform inference with a model on the test set(one needs to first upload `segment_label_ids.csv` to `$BUCKET_NAME`):
 ```sh
+BUCKET_NAME=gs://${USER}_yt8m_train_bucket
 JOB_TO_EVAL=yt8m_train_frame_level_logistic_model
 JOB_NAME=yt8m_inference_$(date +%Y%m%d_%H%M%S); gcloud --verbosity=debug ai-platform jobs \
 submit training $JOB_NAME \
@@ -298,7 +298,9 @@ submit training $JOB_NAME \
 --config=youtube-8m/cloudml-gpu.yaml \
 -- --input_data_pattern='gs://youtube8m-ml/3/frame/test/test*.tfrecord' \
 --train_dir=$BUCKET_NAME/${JOB_TO_EVAL} --segment_labels \
---output_file=$BUCKET_NAME/${JOB_TO_EVAL}/predictions.csv
+--segment_label_ids_file=$BUCKET_NAME/segment_label_ids.csv \
+--output_file=$BUCKET_NAME/${JOB_TO_EVAL}/predictions.csv \
+--batch_size 1024
 ```
 
 Note the confusing use of 'training' in the above gcloud commands. Despite the
